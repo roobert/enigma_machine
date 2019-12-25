@@ -61,7 +61,7 @@ class Rotor(RotorBase):
                 return value[0]
         raise KeyError
 
-    def process(self, key, direction=None, rotate=False):
+    def encode(self, key, direction=None, rotate=False):
         key_next = self.find_key(key, direction=direction)
 
         if rotate:
@@ -83,7 +83,7 @@ class Rotor(RotorBase):
 
 @dataclass
 class Reflector(RotorBase):
-    def process(self, key):
+    def encode(self, key):
         for value in self.rotor:
             if value[0] == key:
                 return value[1]
@@ -94,7 +94,7 @@ class Reflector(RotorBase):
 class Plugboard:
     connections: list = field(default_factory=list)
 
-    def process(self, key):
+    def encode(self, key):
         for connection in self.connections:
             if connection[0] == key:
                 return connection[1]
@@ -126,19 +126,19 @@ class Machine:
     plugboard: Plugboard
 
     def key_press(self, key):
-        key = self.plugboard.process(key)
+        key = self.plugboard.encode(key)
 
-        key, rotate = self.rotor_a.process(key, direction="rtl", rotate=True)
-        key, rotate = self.rotor_b.process(key, direction="rtl", rotate=rotate)
-        key, _ = self.rotor_c.process(key, direction="rtl", rotate=rotate)
+        key, rotate = self.rotor_a.encode(key, direction="rtl", rotate=True)
+        key, rotate = self.rotor_b.encode(key, direction="rtl", rotate=rotate)
+        key, _ = self.rotor_c.encode(key, direction="rtl", rotate=rotate)
 
-        key = self.reflector_b.process(key)
+        key = self.reflector_b.encode(key)
 
-        key, _ = self.rotor_c.process(key, direction="ltr")
-        key, _ = self.rotor_b.process(key, direction="ltr")
-        key, _ = self.rotor_a.process(key, direction="ltr")
+        key, _ = self.rotor_c.encode(key, direction="ltr")
+        key, _ = self.rotor_b.encode(key, direction="ltr")
+        key, _ = self.rotor_a.encode(key, direction="ltr")
 
-        key = self.plugboard.process(key)
+        key = self.plugboard.encode(key)
 
         return self.lightboard.display(key)
 
@@ -150,7 +150,7 @@ def main():
 
     machine = Machine(keyboard=keyboard, plugboard=plugboard)
 
-    message = "HURTYOUBAD"
+    message = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
     collection = ""
     for key in message:
