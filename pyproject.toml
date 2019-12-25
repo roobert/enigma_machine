@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "enigma_machine"
+version = "0.0.1"
+description = ""
+authors = ["Rob Wilson <roobert@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+bidict = "^0.18.3"
+
+[tool.poetry.dev-dependencies]
+black = "^19.10b0"
+pylint = "^2.4.4"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
