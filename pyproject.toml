@@ -6,7 +6,6 @@ authors = ["Rob Wilson <roobert@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-bidict = "^0.18.3"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"

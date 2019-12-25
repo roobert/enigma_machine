@@ -21,6 +21,12 @@
 #     https://en.wikipedia.org/wiki/Enigma_rotor_details
 #
 
+#   TODO
+#
+#     * specify rotor order
+#     * specify reflector
+#
+
 from dataclasses import dataclass, field
 
 
@@ -49,33 +55,26 @@ class Rotor(RotorBase):
 
     def find_key(self, key, direction=None):
         for value in self.rotor:
-            if direction == "rtl":
-                if value[0] == key:
-                    return value[1]
-            elif direction == "ltr":
-                if value[1] == key:
-                    return value[0]
-            else:
-                raise KeyError
+            if (direction == "rtl") and (value[0] == key):
+                return value[1]
+            if (direction == "ltr") and (value[1] == key):
+                return value[0]
         raise KeyError
 
     def process(self, key, direction=None, rotate=False):
-        print(f"k: {key}, d: {direction}, rotate: {rotate}")
         key_next = self.find_key(key, direction=direction)
 
-        if direction == "rtl":
-            if rotate:
-                self.rotate_rotor()
-            return key_next, self.rotate_next_rotor()
+        if rotate:
+            self.rotate()
 
-        if direction == "ltr":
-            return key_next, False
-        raise KeyError
+        return key_next, self.rotate_next_rotor(direction)
 
-    def rotate_rotor(self):
+    def rotate(self):
         self.rotor.insert(0, self.rotor.pop())
 
-    def rotate_next_rotor(self):
+    def rotate_next_rotor(self, direction):
+        if direction == "ltr":
+            return False
         return self.rotor[0][0] == self.notch_key
 
     def __repr__(self):
@@ -128,34 +127,44 @@ class Machine:
 
     def key_press(self, key):
         key = self.plugboard.process(key)
+
         key, rotate = self.rotor_a.process(key, direction="rtl", rotate=True)
         key, rotate = self.rotor_b.process(key, direction="rtl", rotate=rotate)
-        key, rotate = self.rotor_c.process(key, direction="rtl", rotate=rotate)
+        key, _ = self.rotor_c.process(key, direction="rtl", rotate=rotate)
+
         key = self.reflector_b.process(key)
+
         key, _ = self.rotor_c.process(key, direction="ltr")
         key, _ = self.rotor_b.process(key, direction="ltr")
         key, _ = self.rotor_a.process(key, direction="ltr")
+
         key = self.plugboard.process(key)
+
         return self.lightboard.display(key)
 
 
 def main():
     keyboard = Keyboard()
+
     plugboard = Plugboard(connections=[("A", "F"), ("D", "J"), ("O", "X"), ("H", "Z")])
+
     machine = Machine(keyboard=keyboard, plugboard=plugboard)
+
     message = "HURTYOUBAD"
 
     collection = ""
     for key in message:
         collection += machine.key_press(key)
-
-    print("---")
+    # print(collection)
 
     machine = Machine(keyboard=keyboard, plugboard=plugboard)
+
     message = collection
 
+    collection = ""
     for key in message:
-        machine.key_press(key)
+        collection += machine.key_press(key)
+    # print(collection)
 
 
 if __name__ == "__main__":
